@@ -1,0 +1,23 @@
+name: Build FullscreenSplash (.so)
+on:
+  workflow_dispatch:
+  push:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ambil header AML (amlmod.h)
+        run: |
+          git clone --depth 1 https://github.com/RusJJ/AndroidModLoader.git /tmp/aml
+          H=$(find /tmp/aml -name amlmod.h | head -n1)
+          echo "amlmod.h: $H"
+          mkdir -p include/mod
+          cp -r "$(dirname "$H")"/. include/mod/
+      - name: ndk-build
+        run: |
+          $ANDROID_NDK_LATEST_HOME/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk NDK_APPLICATION_MK=Application.mk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FullscreenSplash-so
+          path: libs/**/libFullscreenSplash.so
